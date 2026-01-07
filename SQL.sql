@@ -1,0 +1,359 @@
+create database practice;
+show databases;
+use practice;
+
+CREATE TABLE STUDENT (
+    STUDENT_ID INT NOT NULL,
+    FIRST_NAME VARCHAR(50),
+    LAST_NAME VARCHAR(50),
+    GPA DECIMAL(4, 2),
+    ENROLLMENT_DATE DATE,
+    DEPT VARCHAR(50)
+);
+
+INSERT INTO STUDENT (STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT) VALUES
+(201, 'Shivansh', 'Mahajan', 8.79, '2021-09-01', 'Physics'),
+(202, 'Umesh', 'Sharma', 8.44, '2021-09-01', 'Mathematics'),
+(203, 'Rakesh', 'Kumar', 5.60, '2021-09-01', 'Biology'),
+(204, 'Radha', 'Sharma', 9.20, '2021-09-01', 'Chemistry'),
+(205, 'Kush', 'Kumar', 8.79, '2021-09-01', 'Physics'),
+(206, 'Prem', 'Chopra', 9.56, '2021-09-01', 'History'),
+(207, 'Pankaj', 'Vats', 9.78, '2021-09-01', 'Physics'),
+(208, 'Navleen', 'Kaur', 7.00, '2021-09-01', 'Mathematics'),
+(209, 'Nitin', 'Kumar', 7.00, '2021-09-01', 'English'),
+(210, 'Radhe', 'Gupta', 5.60, '2021-09-01', 'Physics')
+;
+
+CREATE TABLE Scholarship (
+    STUDENT_REF_ID INT NOT NULL,
+    SCHOLARSHIP_AMOUNT INT NOT NULL,
+    SCHOLARSHIP_DATE DATE NOT NULL
+);
+
+INSERT INTO Scholarship (STUDENT_REF_ID, SCHOLARSHIP_AMOUNT, SCHOLARSHIP_DATE)
+VALUES (201, 5000, '2021-10-15 ');
+
+INSERT INTO Scholarship (STUDENT_REF_ID, SCHOLARSHIP_AMOUNT, SCHOLARSHIP_DATE)
+VALUES (202, 4500, '2022-08-18');
+
+INSERT INTO Scholarship (STUDENT_REF_ID, SCHOLARSHIP_AMOUNT, SCHOLARSHIP_DATE)
+VALUES (203, 3000, '2022-01-25');
+
+INSERT INTO Scholarship (STUDENT_REF_ID, SCHOLARSHIP_AMOUNT, SCHOLARSHIP_DATE)
+VALUES (208, 4000, '2021-10-15');
+
+commit;
+
+
+
+------------------------------------------------------------------------------------------------------------------------------
+#Queries for practice
+
+#QUES_1 : Write a SQL query to fetch unique values of DEPT from Student table
+SELECT DISTINCT(DEPT)
+FROM STUDENT ;
+
+#QUES_2 : Write a SQL query to fetch unique values of DEPT from Student table Without special function
+SELECT DEPT
+FROM STUDENT   
+GROUP BY DEPT;
+
+#QUES_3 : Write a SQL query to fetch only duplicate DEPT from Student table
+SELECT COUNT(DEPT),DEPT
+FROM STUDENT
+GROUP BY DEPT
+HAVING COUNT(*)>1;
+
+SELECT DEPT
+FROM STUDENT 
+GROUP BY DEPT
+HAVING COUNT(DEPT)>1;
+
+#QUES_4 : Write a SQL query to print the first 3 characters of FIRST_NAME from Student table.
+SELECT substring(FIRST_NAME,1,3)
+FROM STUDENT;
+
+#Ques_4.2 : Write a SQL query to print the last 2 characters of FIRST_NAME from Student table.
+SELECT substring(FIRST_NAME,(length(FIRST_NAME)-1),length(FIRST_NAME))
+FROM STUDENT;
+
+SELECT length(FIRST_NAME)
+FROM STUDENT; #==>Rakesh-6
+
+#Ques_4.4 : Write a sql query to print the first name from 3rd character
+SELECT FIRST_NAME,SUBSTRING(FIRST_NAME,3)
+FROM STUDENT;
+
+#QUES_5 : Write a SQL query to print details of the Students whose FIRST_NAME start with 'p'.
+SELECT *
+FROM STUDENT 
+WHERE FIRST_NAME LIKE 'P%';
+
+#QUES_6 : Write a SQL query to print details of the Students whose FIRST_NAME end with 'a'.
+SELECT * 
+FROM STUDENT
+WHERE FIRST_NAME LIKE '%a';
+
+#QUES_7 : Write an SQL query to print details of the Students whose GPA lies between 9.00 and 9.99. by using between operator
+SELECT *
+FROM STUDENT
+WHERE GPA BETWEEN 9.00 AND 9.99;
+
+#QUES_8 : Write an SQL query to fetch the count of Students having DEPT ‘Physics’.
+SELECT COUNT(*)
+FROM STUDENT
+GROUP BY DEPT
+HAVING DEPT='Physics';
+
+#QUES_9 : Write an SQL query to fetch the no. of Students for each DEPT in the descending order.
+SELECT COUNT(*) TOTAL, DEPT
+FROM STUDENT
+GROUP BY DEPT
+ORDER BY TOTAL DESC;
+
+#QUES_10 : Write a SQL query that fetches unique DEPT from Student table and print its length.
+SELECT DEPT,LENGTH(DEPT) AS DISTINCT_DEPT
+FROM STUDENT
+GROUP BY DEPT;
+
+#QUES_11 : List all students and their scholarship amounts if they have received any. If a student has not received a scholarship, display NULL for the scholarship details.
+SELECT FIRST_NAME, LAST_NAME, SCHOLARSHIP_AMOUNT
+FROM STUDENT STU LEFT JOIN Scholarship SCH
+ON STU.STUDENT_ID= SCH.STUDENT_REF_ID;
+
+select S1.STUDENT_ID , S1.FIRST_NAME , S1.LAST_NAME , S1.GPA , S1.ENROLLMENT_DATE , S1.DEPT,S2.SCHOLARSHIP_AMOUNT 
+from STUDENT S1 Left outer join Scholarship S2 
+on S1.STUDENT_ID = S2.STUDENT_REF_ID ;
+
+#QUES_12 : Write an SQL query to show the top n (say 5) records of Student table order by descending GPA.
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT
+FROM STUDENT
+ORDER BY GPA DESC  LIMIT 5;
+
+WITH GPA_DESC AS(
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, DENSE_RANK() OVER (ORDER BY STUDENT_ID) AS ROWNUMBER
+FROM STUDENT
+)
+SELECT * 
+FROM GPA_DESC
+WHERE ROWNUMBER<=5;
+
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, RNK
+FROM (
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, DENSE_RANK() OVER (ORDER BY STUDENT_ID) AS RNK
+FROM STUDENT
+)T
+WHERE RNK <= 5;
+
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, RNK
+FROM (
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, row_number() OVER (ORDER BY STUDENT_ID) AS RNK
+FROM STUDENT
+)T
+WHERE RNK <= 5;
+
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, RNK
+FROM (
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, RANK() OVER (ORDER BY STUDENT_ID) AS RNK
+FROM STUDENT
+)T
+WHERE RNK <= 5;
+
+
+#QUES_13 : Write an SQL query to fetch the list of Students with the same GPA. (IMP)
+SELECT *
+FROM STUDENT STU, STUDENT S
+WHERE STU.STUDENT_ID<>S.STUDENT_ID
+AND STU.GPA=S.GPA;
+
+SELECT s1.* 
+FROM Students s1 inner join  Students s2 
+on s1.GPA = s2.GPA 
+where  s1.Student_id != s2.Student_id ;
+
+#QUES_14.1 : Write an SQL query ranks students based on their GPA in descending order using the DENSE_RANK() window function 
+#and displays all student details along with their rank.
+SELECT *
+FROM
+(SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, dense_rank() OVER (ORDER BY GPA DESC) AS RNK FROM STUDENT) T;
+
+WITH GPA_RANK AS(
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, 
+dense_rank () OVER (ORDER BY GPA DESC)
+FROM STUDENT)
+SELECT *
+FROM GPA_RANK;
+
+#QUES_14.2 : Write an SQL query to show the second highest GPA from a Student by using window function
+WITH GPA_RANK AS(
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, DENSE_RANK() OVER (ORDER BY GPA DESC) AS RNK
+FROM STUDENT
+)
+SELECT * FROM 
+GPA_RANK
+WHERE RNK=2;
+
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, RNK
+FROM (SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, DENSE_RANK() OVER (ORDER BY GPA DESC) AS RNK
+FROM STUDENT
+)T
+WHERE RNK=2;
+
+
+
+
+#QUES_15 : Write an SQL query to show one row twice in results from a table.
+SELECT *
+FROM STUDENT
+UNION ALL
+SELECT *
+FROM STUDENT;
+
+#QUES_16 : Write an SQL query to list STUDENT_ID who does not get Scholarship.
+SELECT STUDENT_ID 
+FROM STUDENT
+WHERE STUDENT_ID NOT IN (SELECT STUDENT_ID FROM STUDENT, Scholarship WHERE STUDENT.STUDENT_ID=Scholarship.STUDENT_REF_ID);
+
+SELECT DISTINCT(STUDENT_ID) 
+FROM STUDENT LEFT JOIN Scholarship 
+ON STUDENT.STUDENT_ID=Scholarship.STUDENT_REF_ID
+WHERE Scholarship.STUDENT_REF_ID IS NULL;
+
+SELECT STUDENT_ID
+FROM STUDENT
+WHERE STUDENT_ID NOT IN (
+SELECT STUDENT_REF_ID FROM Scholarship);
+
+
+#QUES_17 : Write an SQL query to fetch the DEPT that have less than 4 people in it.
+SELECT DEPT, COUNT(STUDENT_ID)
+FROM STUDENT
+GROUP BY DEPT
+HAVING COUNT(STUDENT_ID)<4;
+
+#QUES_18 : Write an SQL query to show the last record from a table.
+SELECT * 
+FROM STUDENT 
+WHERE STUDENT_ID=( SELECT MAX(STUDENT_ID) 
+FROM STUDENT);
+
+WITH LAST_REC AS
+(SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, RANK() OVER (ORDER BY STUDENT_ID DESC)  AS RNK
+FROM STUDENT)
+SELECT * 
+FROM LAST_REC
+LIMIT 1;
+
+#QUES_19 : Write an SQL query to fetch the first row of a table.
+SELECT * 
+FROM STUDENT
+LIMIT 1;
+
+SELECT * 
+FROM STUDENT
+WHERE STUDENT_ID=(SELECT MIN(STUDENT_ID) FROM STUDENT);
+
+#QUES_20 : Write an SQL query to fetch the last five records from a table.
+WITH LAST_FIVE AS
+(
+SELECT STUDENT_ID, FIRST_NAME, LAST_NAME, GPA, ENROLLMENT_DATE, DEPT, RANK() OVER (ORDER BY STUDENT_ID DESC) AS RNK
+FROM STUDENT
+)
+SELECT *
+FROM LAST_FIVE
+WHERE RNK<=5
+ORDER BY STUDENT_ID;
+
+SELECT * 
+FROM STUDENT
+ORDER BY STUDENT_ID DESC
+LIMIT 5;
+
+#QUES_21 : Write an SQL query to fetch three max GPA from a table 
+SELECT GPA
+FROM (
+ SELECT GPA, DENSE_RANK() OVER (ORDER BY GPA DESC) AS MAX_GPA
+ FROM STUDENT
+ )T
+ WHERE MAX_GPA<=3;
+ 
+ SELECT DISTINCT(GPA)
+ FROM STUDENT
+ ORDER BY GPA DESC
+ LIMIT 3;
+
+#QUES_22 : Write an SQL query to fetch three min GPA from a table 
+SELECT DISTINCT GPA
+FROM STUDENT
+ORDER BY GPA ASC
+LIMIT 3;
+
+#QUES_23 : Write an SQL query to fetch 3rd highest from a table.
+SELECT DISTINCT GPA
+FROM STUDENT
+ORDER BY GPA DESC
+LIMIT 1 OFFSET 2;
+
+SELECT DISTINCT(GPA)
+FROM(
+SELECT GPA, dense_rank() OVER(ORDER BY GPA DESC) AS RNK
+FROM STUDENT
+)T
+WHERE RNK=3;
+
+#QUES_24 : Write an SQL query to fetch DEPTs along with the max GPA in each of these DEPTs.
+SELECT DISTINCT DEPT, MAX(GPA) OVER (PARTITION BY DEPT) AS MAXIMUM
+FROM STUDENT;
+
+SELECT DEPT,MAX(GPA)
+FROM STUDENT
+GROUP BY DEPT;
+
+SELECT DEPT,MAX(GPA)
+FROM STUDENT
+GROUP BY DEPT
+ORDER BY MAX(GPA) DESC;
+
+#QUES_25 : Write an SQL query to fetch the names of Students who has highest GPA.
+
+SELECT FIRST_NAME, LAST_NAME, DEPT, GPA
+FROM(
+SELECT * , dense_rank() OVER (PARTITION BY DEPT ORDER BY GPA DESC) AS HIGH
+FROM STUDENT)T
+WHERE HIGH=1;
+
+SELECT FIRST_NAME, LAST_NAME, DEPT, GPA
+FROM(
+SELECT * , rank() OVER (PARTITION BY DEPT ORDER BY GPA DESC) AS HIGH
+FROM STUDENT)T
+WHERE HIGH=1;
+
+SELECT
+    FIRST_NAME,
+    LAST_NAME,
+    DEPT,
+    GPA
+FROM Student s
+WHERE GPA = (
+    SELECT MAX(GPA)
+    FROM Student
+    WHERE DEPT = s.DEPT
+);
+
+#QUES_26 : Write an SQL query to find the average GPA for each DEPT
+SELECT DEPT, AVG(GPA)
+FROM STUDENT
+GROUP BY DEPT;
+
+SELECT DISTINCT DEPT, AVG(GPA) OVER (PARTITION BY DEPT) As AVG_GPA
+FROM STUDENT;
+
+#QUES_27 : Write an SQL query to find the number of students deptarment wise  who have GPA > 9.0 
+SELECT COUNT(STUDENT_ID), DEPT
+FROM STUDENT
+WHERE GPA>9.0
+GROUP BY DEPT;
+
+#QUES_28 : Write a SQL query to print the FIRST_NAME and LAST_NAME from Student table into single column COMPLETE_NAME
+SELECT concat(FIRST_NAME," ", LAST_NAME) AS COMPLETE_NAME
+FROM STUDENT;
